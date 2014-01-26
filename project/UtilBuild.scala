@@ -15,10 +15,7 @@ object UtilBuild extends Build {
       "org.java-websocket" % "Java-WebSocket" % "1.3.0",
       "org.scalatest" %% "scalatest" % "1.9.2" % "test"
     ),
-    classesJar in Android := {
-      val fileName = s"${name.value}-${version.value}.jar"
-      (binPath in Android).value / fileName
-    }
+    (publishArtifact in packageBin in Compile) := true
   )
 
   def publishSettings = Seq(
