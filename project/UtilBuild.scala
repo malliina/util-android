@@ -2,7 +2,6 @@ import sbt._
 import sbt.Keys._
 import android.Keys._
 import xerial.sbt.Sonatype
-import xerial.sbt.Sonatype.SonatypeKeys
 
 object UtilBuild extends Build {
   lazy val utilProject = Project("util-android", file(".")).settings(utilSettings: _*)
@@ -24,40 +23,17 @@ object UtilBuild extends Build {
 
   def publishSettings = Sonatype.sonatypeSettings ++ Seq(
     organization := "com.github.malliina",
-    publishTo <<= version(v => {
-      val repo =
-        if (v endsWith "SNAPSHOT") {
-          "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
-        } else {
-          "Sonatype releases" at "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-        }
-      Some(repo)
-    }),
-    credentials += Credentials(Path.userHome / ".ivy2" / "sonatype.txt"),
-    publishMavenStyle := true,
+    // The Credentials object must be a DirectCredentials. We obtain one using loadCredentials(File).
+    credentials += loadDirectCredentials(Path.userHome / ".ivy2" / "sonatype.txt"),
     publishArtifact in Test := false,
-    pomIncludeRepository := (_ => false),
-    pomExtra := extraPom
+    pomExtra := myGitPom(name.value)
   )
 
-  def extraPom =
-    (<url>https://github.com/malliina/util-android</url>
-      <licenses>
-        <license>
-          <name>BSD-style</name>
-          <url>http://www.opensource.org/licenses/BSD-3-Clause</url>
-          <distribution>repo</distribution>
-        </license>
-      </licenses>
-      <scm>
-        <url>git@github.com:malliina/util-android.git</url>
-        <connection>scm:git:git@github.com:malliina/util-android.git</connection>
-      </scm>
-      <developers>
-        <developer>
-          <id>malliina</id>
-          <name>Michael Skogberg</name>
-          <url>http://mskogberg.info</url>
-        </developer>
-      </developers>)
+  def loadDirectCredentials(file: File) =
+    Credentials.loadCredentials(file).fold(
+      errorMsg => throw new Exception(errorMsg),
+      cred => cred)
+
+  def myGitPom(projectName: String) =
+    com.mle.sbthelpers.SbtHelpers.gitPom(projectName, "malliina", "Michael Skogberg", "http://mskogberg.info")
 }
