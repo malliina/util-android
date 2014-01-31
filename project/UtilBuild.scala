@@ -6,7 +6,7 @@ import xerial.sbt.Sonatype
 object UtilBuild extends Build {
   lazy val utilProject = Project("util-android", file(".")).settings(utilSettings: _*)
   lazy val utilSettings = android.Plugin.androidBuild ++ publishSettings ++ Seq(
-    version := "0.1.2",
+    version := "0.2.0",
     platformTarget in Android := "android-18",
     libraryProject := true,
     libraryDependencies ++= Seq(
@@ -14,6 +14,7 @@ object UtilBuild extends Build {
       "com.typesafe.play" %% "play-json" % "2.2.0",
       "com.loopj.android" % "android-async-http" % "1.4.4",
       "org.java-websocket" % "Java-WebSocket" % "1.3.0",
+      "com.github.malliina" %% "util-base" % "0.0.3",
       "org.scalatest" %% "scalatest" % "1.9.2" % "test"
     ),
     // android-sdk-plugin sets these to false, but we want to create jars for maven
