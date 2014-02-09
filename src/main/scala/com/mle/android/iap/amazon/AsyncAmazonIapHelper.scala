@@ -45,9 +45,9 @@ class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) {
 
   def hasSku(sku: String) = entitledSkus.map(_.contains(sku))
 
-  def onEntitledSkus(skus: Set[String]): Unit = entitledPromise success skus
+  def onEntitledSkus(skus: Set[String]): Unit = completeIfPossible(skus, entitledPromise)
 
-  def onRevokedSkus(skus: Set[String]): Unit = revokedPromise success skus
+  def onRevokedSkus(skus: Set[String]): Unit = completeIfPossible(skus, revokedPromise)
 
   override def onSdkAvailable(isSandboxMode: Boolean): Unit = {
     super.onSdkAvailable(isSandboxMode)
@@ -55,7 +55,7 @@ class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) {
     if (isSandboxMode && !isSandboxAllowed) {
       failIfPossible(new SandboxModeException, userIdPromise)
     }
-    if(!isSandboxMode || isSandboxAllowed) {
+    if (!isSandboxMode || isSandboxAllowed) {
       // the getUserId callback calls the get purchase status,
       // the callback of which will eventually complete the promises
       PurchasingManager.initiateGetUserIdRequest()
@@ -94,14 +94,16 @@ class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) {
   // Defensive coding because the IAP API is not thread-safe as far as I know
 
   private def completeIfPossible[T](value: T, promise: Promise[T]): Unit =
-    tryIfPossible(promise)(_ success value)
+    tryIfPossible(promise)(_ trySuccess value)
 
   private def failIfPossible(t: Throwable, promises: Promise[_]*): Unit =
-    promises foreach (p => tryIfPossible(p)(_ failure t))
+    promises foreach (p => tryIfPossible(p)(_ tryFailure t))
 
-  private def tryIfPossible[T](promise: Promise[T])(f: Promise[T] => Any) {
+  private def tryIfPossible[T, U](promise: Promise[T])(f: Promise[T] => U): Option[Try[U]] = {
     if (!promise.isCompleted) {
-      Try(f(promise))
+      Some(Try(f(promise)))
+    } else {
+      None
     }
   }
 }

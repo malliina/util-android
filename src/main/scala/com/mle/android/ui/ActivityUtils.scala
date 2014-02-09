@@ -17,6 +17,8 @@ trait ActivityUtils {
 
   def prefs = PreferenceManager.getDefaultSharedPreferences(activity)
 
+  def findPrefs = findActivity.map(PreferenceManager.getDefaultSharedPreferences)
+
   def tryFindView[A](id: Int): Option[A] =
     for {
       a <- findActivity

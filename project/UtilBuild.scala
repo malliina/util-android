@@ -6,7 +6,7 @@ import xerial.sbt.Sonatype
 object UtilBuild extends Build {
   lazy val utilProject = Project("util-android", file(".")).settings(utilSettings: _*)
   lazy val utilSettings = android.Plugin.androidBuild ++ publishSettings ++ Seq(
-    version := "0.2.0",
+    version := "0.3.0",
     platformTarget in Android := "android-18",
     libraryProject := true,
     libraryDependencies ++= Seq(
