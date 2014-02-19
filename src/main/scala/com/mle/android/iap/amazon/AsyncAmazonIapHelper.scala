@@ -2,11 +2,11 @@ package com.mle.android.iap.amazon
 
 import android.content.Context
 import com.amazon.inapp.purchasing.{PurchasingManager, GetUserIdResponse, PurchaseUpdatesResponse, PurchaseResponse}
-import scala.concurrent.{Promise, promise}
-import com.mle.android.exceptions.AndroidException
+import scala.concurrent.promise
 import com.mle.util.Utils
 import Utils.executionContext
-import scala.util.Try
+import com.mle.android.iap.{AlreadyPurchasedException, InvalidSkuException, IapException, IapUtilsBase}
+import com.mle.concurrent.PromiseHelpers
 
 /**
  * This class registers itself as the observer for the
@@ -22,11 +22,10 @@ import scala.util.Try
  *
  * @author mle
  */
-class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) {
+class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) with PromiseHelpers {
   private val isSandboxAllowed: Boolean = true
   private val purchaseUpdateFailureMessage = "Unable to read purchase status."
   private val getUserFailureMessage = "Unable to read the current user ID."
-  private val purchaseFailedMessage = "The purchase did not complete successfully."
 
   private val isSandboxPromise = promise[Boolean]()
   private val userIdPromise = promise[String]()
@@ -45,15 +44,15 @@ class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) {
 
   def hasSku(sku: String) = entitledSkus.map(_.contains(sku))
 
-  def onEntitledSkus(skus: Set[String]): Unit = completeIfPossible(skus, entitledPromise)
+  def onEntitledSkus(skus: Set[String]): Unit = trySuccess(skus, entitledPromise)
 
-  def onRevokedSkus(skus: Set[String]): Unit = completeIfPossible(skus, revokedPromise)
+  def onRevokedSkus(skus: Set[String]): Unit = trySuccess(skus, revokedPromise)
 
   override def onSdkAvailable(isSandboxMode: Boolean): Unit = {
     super.onSdkAvailable(isSandboxMode)
-    completeIfPossible(isSandboxMode, isSandboxPromise)
+    trySuccess(isSandboxMode, isSandboxPromise)
     if (isSandboxMode && !isSandboxAllowed) {
-      failIfPossible(new SandboxModeException, userIdPromise)
+      tryFailure(new SandboxModeException, userIdPromise)
     }
     if (!isSandboxMode || isSandboxAllowed) {
       // the getUserId callback calls the get purchase status,
@@ -63,57 +62,40 @@ class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) {
   }
 
   def onUserId(userId: String) = {
-    info(s"Amazon IAP user identified as: $userId")
-    completeIfPossible(userId, userIdPromise)
+//    info(s"Amazon IAP user identified as: $userId")
+    trySuccess(userId, userIdPromise)
   }
 
   override def onGetUserIdFailed(response: GetUserIdResponse): Unit = {
     super.onGetUserIdFailed(response)
-    val ex = new AmazonIapException(getUserFailureMessage)
-    failIfPossible(ex, userIdPromise, entitledPromise, revokedPromise)
+    val ex = new IapException(getUserFailureMessage)
+    tryFailure(ex, userIdPromise, entitledPromise, revokedPromise)
   }
 
   override def onPurchaseStatusFailed(response: PurchaseUpdatesResponse): Unit = {
     super.onPurchaseStatusFailed(response)
-    val ex = new AmazonIapException(purchaseUpdateFailureMessage)
-    failIfPossible(ex, entitledPromise, revokedPromise)
+    val ex = new IapException(purchaseUpdateFailureMessage)
+    tryFailure(ex, entitledPromise, revokedPromise)
   }
 
-  def onPurchaseSucceeded(sku: String): Unit = completeIfPossible(sku, purchasePromise)
+  def onPurchaseSucceeded(sku: String): Unit = trySuccess(sku, purchasePromise)
 
   def onPurchaseFailed(response: PurchaseResponse): Unit = {
     import com.amazon.inapp.purchasing.PurchaseResponse.PurchaseRequestStatus._
     val ex = response.getPurchaseRequestStatus match {
-      case INVALID_SKU => new InvalidSkuException(response)
-      case ALREADY_ENTITLED => new AlreadyPurchased(response)
-      case _ => new AmazonPurchaseException(purchaseFailedMessage, response)
+      case INVALID_SKU => new AmazonInvalidSkuException(response)
+      case ALREADY_ENTITLED => new AmazonAlreadyPurchasedException(response)
+      case _ => new AmazonPurchaseException(IapUtilsBase.purchaseFailedMessage, response)
     }
-    failIfPossible(ex, purchasePromise)
+    tryFailure(ex, purchasePromise)
   }
 
-  // Defensive coding because the IAP API is not thread-safe as far as I know
-
-  private def completeIfPossible[T](value: T, promise: Promise[T]): Unit =
-    tryIfPossible(promise)(_ trySuccess value)
-
-  private def failIfPossible(t: Throwable, promises: Promise[_]*): Unit =
-    promises foreach (p => tryIfPossible(p)(_ tryFailure t))
-
-  private def tryIfPossible[T, U](promise: Promise[T])(f: Promise[T] => U): Option[Try[U]] = {
-    if (!promise.isCompleted) {
-      Some(Try(f(promise)))
-    } else {
-      None
-    }
-  }
 }
 
-class AmazonIapException(msg: String) extends AndroidException(msg)
+class AmazonPurchaseException(msg: String, val response: PurchaseResponse) extends IapException(msg)
 
-class AmazonPurchaseException(msg: String, val response: PurchaseResponse) extends AmazonIapException(msg)
+class AmazonInvalidSkuException(val response: PurchaseResponse) extends InvalidSkuException
 
-class InvalidSkuException(response: PurchaseResponse) extends AmazonPurchaseException("The product ID did not exist. Try again later.", response)
+class AmazonAlreadyPurchasedException(response: PurchaseResponse) extends AlreadyPurchasedException
 
-class AlreadyPurchased(response: PurchaseResponse) extends AmazonPurchaseException("The product has already been purchased.", response)
-
-class SandboxModeException extends AmazonIapException("The purchasing manager is running in sandbox mode. Please ensure that you have downloaded this app from Amazon AppStore, then try again.")
+class SandboxModeException extends IapException("The purchasing manager is running in sandbox mode. Please ensure that you have downloaded this app from Amazon AppStore, then try again.")

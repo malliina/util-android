@@ -9,6 +9,7 @@ import play.api.libs.json.{Writes, Json, JsValue}
 import scala.concurrent.Future
 import com.mle.android.http.{MySslSocketFactory, HttpConstants, HttpUtil}
 import com.mle.android.util.UtilLog
+import com.mle.android.exceptions.NotConnectedException
 
 
 /**
@@ -26,17 +27,18 @@ class JsonWebSocketClient(uri: String, username: String, password: String, addit
 
   val client = new WebSocketClient(URI create uri, new drafts.Draft_10, headers, 0) {
     def onOpen(handshakedata: ServerHandshake) {
-      info(s"Opened websocket to: $uri")
-      connectPromise.success()
+      debug(s"Opened websocket to: $uri")
+      connectPromise.trySuccess(())
     }
 
     def onMessage(message: String): Unit = {
-      info(s"Message: $message")
+      //      info(s"Message: $message")
       JsonWebSocketClient.this.onMessage(Json.parse(message))
     }
 
     def onClose(code: Int, reason: String, remote: Boolean) {
-      info(s"Closed websocket to: $uri, code: $code, reason: $reason")
+      debug(s"Closed websocket to: $uri, code: $code, reason: $reason")
+      connectPromise.tryFailure(new NotConnectedException(s"The websocket was closed. Code: $code, reason: $reason."))
     }
 
     /**
@@ -44,6 +46,7 @@ class JsonWebSocketClient(uri: String, username: String, password: String, addit
      */
     def onError(ex: Exception) {
       warn("WebSocket error", ex)
+      connectPromise.tryFailure(ex)
     }
   }
   if (uri startsWith "wss") {
@@ -56,6 +59,14 @@ class JsonWebSocketClient(uri: String, username: String, password: String, addit
 
   def isConnected = client.getConnection.isOpen
 
+  /**
+   * Reconnections are currently not supported; only call this method once per instance.
+   *
+   * Impl: On subsequent calls, the returned future will always completed regardless of
+   * connection result
+   *
+   * @return a future that completes when the connection has successfully been established
+   */
   def connect: Future[Unit] = {
     client.connect()
     connectPromise.future

@@ -5,6 +5,7 @@ import android.preference.PreferenceManager
 import android.content.Intent
 import android.widget.Toast
 import com.mle.util.Utils
+import android.support.v4.app.DialogFragment
 
 /**
  *
@@ -39,7 +40,6 @@ trait ActivityUtils {
   }
 
   def onUiThread(f: => Any): Unit = activity.runOnUiThread(Utils.runnable(f))
-
 
   def showToast(text: String, duration: Int = Toast.LENGTH_LONG): Unit =
     onUiThread(Toast.makeText(activity, text, duration).show())

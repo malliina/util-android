@@ -9,9 +9,9 @@ import collection.JavaConversions._
 import android.app.Activity
 import com.mle.util.Utils
 import Utils.executionContext
-import com.mle.android.exceptions.AndroidException
 import java.util.UUID
 import com.mle.util.Utils
+import com.mle.android.iap.IapException
 
 /**
  * Converts Google Play's callback-based IAB API to one based on [[scala.concurrent.Future]]s.
@@ -128,16 +128,15 @@ class AsyncIabHelper(activity: Activity, val iabHelper: IabHelper) {
     val p = promise[T]()
 
     def handle(result: IabResult, item: T): Unit =
-      if (result.isSuccess) p success item
-      else p failure new IabResultException(result.getMessage, result)
+      if (result.isSuccess) p trySuccess item
+      else p tryFailure new IabResultException(result.getMessage, result)
 
     def future = p.future
   }
-
 }
 
-class GooglePlayException(msg: String, val throwable: Throwable) extends AndroidException(msg, Some(throwable))
+class GooglePlayException(msg: String, val throwable: Throwable) extends IapException(msg, Some(throwable))
 
-class IabResultException(msg: String, val result: IabResult) extends AndroidException(msg)
+class IabResultException(msg: String, val result: IabResult) extends IapException(msg)
 
-class PayloadMismatchException(msg: String, val result: IabResult, val purchase: Purchase) extends AndroidException(msg)
+class PayloadMismatchException(msg: String, val result: IabResult, val purchase: Purchase) extends IapException(msg)
