@@ -1,40 +1,35 @@
+import com.mle.sbtutils.SbtUtils
 import sbt._
 import sbt.Keys._
 import android.Keys._
-import xerial.sbt.Sonatype
 
 object UtilBuild extends Build {
   lazy val utilProject = Project("util-android", file(".")).settings(utilSettings: _*)
   lazy val utilSettings = android.Plugin.androidBuild ++ publishSettings ++ Seq(
-    version := "0.5.0",
+    scalaVersion := "2.10.4",
+  // cannot switch to 2.11 because play-json only exists for 2.10
+//    crossScalaVersions := Seq("2.11.0", "2.10.4"),
+    version := "0.7.1",
     platformTarget in Android := "android-18",
     libraryProject := true,
     libraryDependencies ++= Seq(
       "com.android.support" % "support-v4" % "19.0.0",
-      "com.typesafe.play" %% "play-json" % "2.2.0",
+      "com.typesafe.play" %% "play-json" % "2.2.2",
       "com.loopj.android" % "android-async-http" % "1.4.4",
       "org.java-websocket" % "Java-WebSocket" % "1.3.0",
-      "com.github.malliina" %% "util-base" % "0.0.4",
-      "org.scalatest" %% "scalatest" % "2.0" % "test"
+      "com.github.malliina" %% "util-base" % "0.1.0",
+      "org.scalatest" %% "scalatest" % "2.1.3" % "test"
     ),
     // android-sdk-plugin sets these to false, but we want to create jars for maven
     (publishArtifact in packageBin in Compile) := true,
     (publishArtifact in packageSrc in Compile) := true
   )
 
-  def publishSettings = Sonatype.sonatypeSettings ++ Seq(
-    organization := "com.github.malliina",
-    // The Credentials object must be a DirectCredentials. We obtain one using loadCredentials(File).
-    credentials += loadDirectCredentials(Path.userHome / ".ivy2" / "sonatype.txt"),
-    publishArtifact in Test := false,
-    pomExtra := myGitPom(name.value)
+  import SbtUtils._
+
+  def publishSettings = SbtUtils.publishSettings ++ Seq(
+    developerName := "Michael Skogberg",
+    gitUserName := "malliina",
+    developerHomePageUrl := "http://mskogberg.info"
   )
-
-  def loadDirectCredentials(file: File) =
-    Credentials.loadCredentials(file).fold(
-      errorMsg => throw new Exception(errorMsg),
-      cred => cred)
-
-  def myGitPom(projectName: String) =
-    com.mle.sbthelpers.SbtHelpers.gitPom(projectName, "malliina", "Michael Skogberg", "http://mskogberg.info")
 }

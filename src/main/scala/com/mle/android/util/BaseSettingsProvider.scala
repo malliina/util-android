@@ -3,6 +3,7 @@ package com.mle.android.util
 import android.content.SharedPreferences
 import play.api.libs.json.{Reads, Writes}
 import play.api.libs.json.Json._
+import PreferenceImplicits._
 
 /**
  *
@@ -17,7 +18,7 @@ trait BaseSettingsProvider {
     savePref(key, stringify(toJson(values)))
 
   def savePref(key: String, value: String): Unit =
-    prefs.edit().putString(key, value).apply()
+    prefs.put(key, value)
 
   def loadSeqOrEmpty[T](key: String)(implicit tjs: Reads[T]) =
     loadSeq(key) getOrElse Seq.empty
