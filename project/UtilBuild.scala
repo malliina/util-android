@@ -7,9 +7,9 @@ object UtilBuild extends Build {
   lazy val utilProject = Project("util-android", file(".")).settings(utilSettings: _*)
   lazy val utilSettings = android.Plugin.androidBuild ++ publishSettings ++ Seq(
     scalaVersion := "2.10.4",
-  // cannot switch to 2.11 because play-json only exists for 2.10
-//    crossScalaVersions := Seq("2.11.0", "2.10.4"),
-    version := "0.7.1",
+    // cannot switch to 2.11 because play-json only exists for 2.10
+    //    crossScalaVersions := Seq("2.11.0", "2.10.4"),
+    version := "0.7.2",
     platformTarget in Android := "android-18",
     libraryProject := true,
     libraryDependencies ++= Seq(
@@ -32,4 +32,20 @@ object UtilBuild extends Build {
     gitUserName := "malliina",
     developerHomePageUrl := "http://mskogberg.info"
   )
+
+//  def amazonProguardOptions = Seq(
+//    "-dontwarn com.amazon.**",
+//    "-keep class com.amazon.** {*;}",
+//    "-keepattributes *Annotation*",
+//    "-dontoptimize "
+//  )
+//
+//  def allProguardOptions = amazonProguardOptions ++ Seq(
+//    "-dontwarn org.w3c.**"
+//  )
+//
+//  def utilAndroidProguardSettings = Seq(
+//    proguardOptions in Android ++= allProguardOptions,
+//    apkbuildExcludes in Android ++= Seq("LICENSE.txt", "NOTICE.txt", "LICENSE", "NOTICE").map(file => s"META-INF/$file")
+//  )
 }
