@@ -25,7 +25,7 @@ trait MleLog {
 
   protected def failMessage(e: Throwable, stackTrace: Boolean = true): String = {
     val exName = e.getClass.getName
-    val explanation = Option(e.getMessage).filter(_.trim.size > 0).map(msg => s": $msg").getOrElse("")
+    val explanation = Option(e.getMessage).filter(_.trim.size > 0).fold("")(msg => s": $msg")
     if (stackTrace) s"$exName$explanation\n${e.getStackTraceString}"
     else s"$exName$explanation"
   }
