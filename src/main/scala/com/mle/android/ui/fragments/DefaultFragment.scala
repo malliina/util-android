@@ -7,7 +7,7 @@ import android.os.Bundle
  *
  * @author mle
  */
-trait FragmentBase extends FragmentHelpers {
+trait DefaultFragment extends BaseFragment {
   def layoutId: Int
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View =

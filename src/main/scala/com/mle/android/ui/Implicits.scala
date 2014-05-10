@@ -7,18 +7,26 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.SeekBar.OnSeekBarChangeListener
-import android.widget.{SeekBar, AdapterView}
+import android.widget.{Adapter, SeekBar, AdapterView}
 
 /**
  *
  * @author mle
  */
 object Implicits {
+
+  implicit class RichAdapterView[T <: Adapter](val listener: AdapterView[T]) {
+    def setListener(f: () => Any): Unit = setListener(_ => f())
+
+    def setListener(f: View => Any): Unit =
+      listener setOnClickListener new OnClickListener {
+        override def onClick(v: View): Unit = f(v)
+      }
+  }
+
   implicit def action2clickListener(f: View => Any): OnClickListener = {
     new OnClickListener {
-      def onClick(v: View) {
-        f(v)
-      }
+      def onClick(v: View): Unit = f(v)
     }
   }
 

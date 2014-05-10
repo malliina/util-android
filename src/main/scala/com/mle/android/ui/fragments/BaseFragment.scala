@@ -9,7 +9,7 @@ import android.app.Activity
  *
  * @author mle
  */
-trait FragmentHelpers extends Fragment with ActivityUtils {
+trait BaseFragment extends Fragment with ActivityUtils {
   def activity: Activity = getActivity
 
   def findViewById(id: Int): View = activity findViewById id
