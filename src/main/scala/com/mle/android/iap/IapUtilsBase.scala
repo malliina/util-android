@@ -20,6 +20,13 @@ trait IapUtilsBase extends UtilLog {
   def hasSku(sku: String, activity: Activity): Future[Boolean]
 
   /**
+   * @param sku product ID
+   * @param activity context
+   * @return the details of `sku` or a failure with [[NoSuchElementException]] if `sku` does not exist
+   */
+  def productInfo(sku: String, activity: Activity): Future[ProductInfo]
+
+  /**
    * Initiates the purchase of `sku`.
    *
    * The returned [[Future]] fails with an [[IapException]], for example

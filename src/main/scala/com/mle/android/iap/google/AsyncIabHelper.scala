@@ -1,10 +1,10 @@
 package com.mle.android.iap.google
 
-import com.android.iab.util.{Purchase, Inventory, IabResult, IabHelper}
+import com.android.iab.util._
 import scala.concurrent.Future
 import scala.concurrent.promise
 import com.android.iab.util.IabHelper.{OnIabPurchaseFinishedListener, QueryInventoryFinishedListener, OnIabSetupFinishedListener}
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 import collection.JavaConversions._
 import android.app.Activity
 import com.mle.util.Utils
@@ -12,6 +12,10 @@ import Utils.executionContext
 import java.util.UUID
 import com.mle.util.Utils
 import com.mle.android.iap.IapException
+import java.io.Closeable
+import scala.util.Failure
+import scala.Some
+import scala.util.Success
 
 /**
  * Converts Google Play's callback-based IAB API to one based on [[scala.concurrent.Future]]s.
@@ -21,7 +25,7 @@ import com.mle.android.iap.IapException
  *
  * @author mle
  */
-class AsyncIabHelper(activity: Activity, val iabHelper: IabHelper) {
+class AsyncIabHelper(activity: Activity, val iabHelper: IabHelper) extends Closeable {
   iabHelper enableDebugLogging true
 
   // not sure why I need to specify the types
@@ -49,7 +53,7 @@ class AsyncIabHelper(activity: Activity, val iabHelper: IabHelper) {
   def inventory(skus: Seq[String], querySkuDetails: Boolean = true): Future[Inventory] =
     inventoryFuture(listener => iabHelper.queryInventoryAsync(querySkuDetails, skus, listener))
 
-  def productDetails(sku: String) = inventory(Seq(sku)).map(_.getSkuDetails(sku))
+  def productDetails(sku: String): Future[SkuDetails] = inventory(Seq(sku)).map(_.getSkuDetails(sku))
 
   /**
    * Purchases `sku`.
@@ -75,19 +79,20 @@ class AsyncIabHelper(activity: Activity, val iabHelper: IabHelper) {
   def purchase(activity: Activity, sku: String, requestCode: Int): Future[Purchase] =
     purchase(activity, sku, requestCode, UUID.randomUUID().toString)
 
-  private def inventoryFuture(f: InventoryListener => Unit): Future[Inventory] =
-    makeFuture[Inventory, InventoryListener](new InventoryListener)(f)
 
-  def dispose(): Unit = iabHelper.dispose()
+  def close(): Unit = iabHelper.dispose()
 
   private def makeFuture[T, L <: FutureBuilder[T]](listener: L)(f: L => Unit): Future[T] = {
     val l = listener
     withGooglePlay {
-      // submit the request on the UI thread, apparently required
+      // submits the request on the UI thread, apparently required
       activity.runOnUiThread(Utils.runnable(f(l)))
       l.future
     }
   }
+
+  private def inventoryFuture(f: InventoryListener => Unit): Future[Inventory] =
+    makeFuture[Inventory, InventoryListener](new InventoryListener)(f)
 
   /**
    * Operations on [[com.android.iab.util.IabHelper]] may throw [[java.lang.NullPointerException]]
@@ -133,6 +138,7 @@ class AsyncIabHelper(activity: Activity, val iabHelper: IabHelper) {
 
     def future = p.future
   }
+
 }
 
 class GooglePlayException(msg: String, val throwable: Throwable) extends IapException(msg, Some(throwable))

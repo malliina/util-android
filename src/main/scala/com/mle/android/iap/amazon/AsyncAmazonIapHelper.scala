@@ -1,12 +1,13 @@
 package com.mle.android.iap.amazon
 
 import android.content.Context
-import com.amazon.inapp.purchasing.{PurchasingManager, GetUserIdResponse, PurchaseUpdatesResponse, PurchaseResponse}
+import com.amazon.inapp.purchasing._
 import scala.concurrent.promise
 import com.mle.util.Utils
 import Utils.executionContext
-import com.mle.android.iap.{AlreadyPurchasedException, InvalidSkuException, IapException, IapUtilsBase}
+import com.mle.android.iap._
 import com.mle.concurrent.PromiseHelpers
+import com.amazon.inapp.purchasing.ItemDataResponse.ItemDataRequestStatus
 
 /**
  * This class registers itself as the observer for the
@@ -25,6 +26,7 @@ import com.mle.concurrent.PromiseHelpers
 class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) with PromiseHelpers {
   private val isSandboxAllowed: Boolean = true
   private val purchaseUpdateFailureMessage = "Unable to read purchase status."
+  private val itemStatusFailureMessage = "Unable to read item data."
   private val getUserFailureMessage = "Unable to read the current user ID."
 
   private val isSandboxPromise = promise[Boolean]()
@@ -32,10 +34,12 @@ class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) w
   private val entitledPromise = promise[Set[String]]()
   private val revokedPromise = promise[Set[String]]()
   private val purchasePromise = promise[String]()
+  private val availableItemsPromise = promise[Set[ProductInfo]]()
 
   val isSandbox = isSandboxPromise.future
   val entitledSkus = entitledPromise.future
   val revokedSkus = revokedPromise.future
+  val availableItems = availableItemsPromise.future
   val userId = userIdPromise.future
   val purchase = purchasePromise.future
 
@@ -62,7 +66,7 @@ class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) w
   }
 
   def onUserId(userId: String) = {
-//    info(s"Amazon IAP user identified as: $userId")
+    //    info(s"Amazon IAP user identified as: $userId")
     trySuccess(userId, userIdPromise)
   }
 
@@ -76,6 +80,20 @@ class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) w
     super.onPurchaseStatusFailed(response)
     val ex = new IapException(purchaseUpdateFailureMessage)
     tryFailure(ex, entitledPromise, revokedPromise)
+  }
+
+
+  override def onItemDataResponse(response: ItemDataResponse): Unit = {
+    super.onItemDataResponse(response)
+    if (response.getItemDataRequestStatus == ItemDataRequestStatus.SUCCESSFUL) {
+      val ex = new IapException(itemStatusFailureMessage)
+      tryFailure(ex, availableItemsPromise)
+    } else {
+      import collection.JavaConversions._
+      val infos = response.getItemData.values()
+        .map(item => ProductInfo(item.getSku, item.getPrice, item.getTitle, item.getDescription)).toSet
+      trySuccess(infos, availableItemsPromise)
+    }
   }
 
   def onPurchaseSucceeded(sku: String): Unit = trySuccess(sku, purchasePromise)

@@ -6,7 +6,7 @@ import scala.util.Try
 import scala.concurrent.Future
 import com.mle.util.Utils
 import Utils.executionContext
-import com.mle.android.iap.IapUtilsBase
+import com.mle.android.iap.{ProductInfo, IapUtilsBase}
 
 /**
  *
@@ -32,31 +32,44 @@ trait GoogleIapUtils extends IapUtilsBase {
    * @param activity an activity
    * @return true if the user owns `sku`, false otherwise
    */
-  def hasSku(sku: String, activity: Activity): Future[Boolean] = {
+  def hasSku(sku: String, activity: Activity): Future[Boolean] = withIAB(activity, iab => {
+    iab.hasPurchase(sku).map(has => {
+      info(s"User has SKU $sku: $has")
+      has
+    })
+  })
+
+  override def productInfo(sku: String, activity: Activity): Future[ProductInfo] = withIAB(activity, iab => {
+    iab.productDetails(sku).map(d => ProductInfo(d.getSku, d.getPrice, d.getTitle, d.getDescription))
+  })
+
+
+  def purchase(sku: String, activity: Activity): Future[String] = {
+    val iab = new AsyncIabHelper(activity, new IabHelper(activity, publicKey))
+    val fut = iab.purchase(activity, sku, 1000).map(_.getSku)
+    fut.onComplete(_ => Try(iab.close()))
+    fut
+  }
+
+  private def withIAB[T](activity: Activity, f: AsyncIabHelper => Future[T]): Future[T] = {
     isSyncing = true
     val iab = new AsyncIabHelper(activity, new IabHelper(activity, publicKey))
-    val result =
-      for {
-        setupComplete <- iab.startSetup
-        isSkuPurchased <- iab.hasPurchase(sku)
-      } yield {
-        info(s"User has SKU $sku: $isSkuPurchased")
-        isSkuPurchased
-      }
+    val result = iab.startSetup.flatMap(_ => f(iab))
+    //      for {
+    //        setupComplete <- iab.startSetup
+    //        isSkuPurchased <- iab.hasPurchase(sku)
+    //      } yield {
+    //        info(s"User has SKU $sku: $isSkuPurchased")
+    //        isSkuPurchased
+    //      }
     result
-      .recover(logException("Unable to sync Google Play purchase status")) // catch
+      .recover(logException("Unable to sync Google Play purchase status"))
       .onComplete(_ => {
       // finally
-      Try(iab.dispose())
+      Try(iab.close())
       isSyncing = false
     })
     result
   }
 
-  def purchase(sku: String, activity: Activity): Future[String] = {
-    val iab = new AsyncIabHelper(activity, new IabHelper(activity, publicKey))
-    val fut = iab.purchase(activity, sku, 1000).map(_.getSku)
-    fut.onComplete(_ => Try(iab.dispose()))
-    fut
-  }
 }
