@@ -15,6 +15,8 @@ object PreferenceImplicits {
 
     def putInt(key: String, value: Int) = withEditor(_.putInt(key, value))
 
+    def putBoolean(key: String, value: Boolean) = withEditor(_.putBoolean(key, value))
+
     def withEditor(f: SharedPreferences.Editor => SharedPreferences.Editor) =
       f(pref.edit()).apply()
   }
