@@ -10,7 +10,7 @@ object UtilBuild extends Build {
     scalaVersion := "2.10.4",
     // cannot switch to 2.11 because play-json only exists for 2.10
     //    crossScalaVersions := Seq("2.11.0", "2.10.4"),
-    version := "0.7.8",
+    version := "0.7.9",
     platformTarget in Android := "android-19",
     libraryProject := true,
     libraryDependencies ++= Seq(
