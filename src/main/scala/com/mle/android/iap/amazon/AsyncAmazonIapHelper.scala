@@ -86,13 +86,13 @@ class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) w
   override def onItemDataResponse(response: ItemDataResponse): Unit = {
     super.onItemDataResponse(response)
     if (response.getItemDataRequestStatus == ItemDataRequestStatus.SUCCESSFUL) {
-      val ex = new IapException(itemStatusFailureMessage)
-      tryFailure(ex, availableItemsPromise)
-    } else {
       import collection.JavaConversions._
       val infos = response.getItemData.values()
         .map(item => ProductInfo(item.getSku, item.getPrice, item.getTitle, item.getDescription)).toSet
       trySuccess(infos, availableItemsPromise)
+    } else {
+      val ex = new IapException(itemStatusFailureMessage)
+      tryFailure(ex, availableItemsPromise)
     }
   }
 
