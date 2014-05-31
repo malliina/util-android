@@ -10,16 +10,13 @@ import com.mle.concurrent.PromiseHelpers
 import com.amazon.inapp.purchasing.ItemDataResponse.ItemDataRequestStatus
 
 /**
- * This class registers itself as the observer for the
- * [[com.amazon.inapp.purchasing.PurchasingManager]] upon
+ * This class registers itself as the observer for the [[com.amazon.inapp.purchasing.PurchasingManager]] upon
  * construction.
  *
- * Clients shall not use this class directly. Instead, use
- * [[com.mle.android.iap.amazon.AmazonIapUtils]].
+ * Clients shall not use this class directly. Instead, use [[com.mle.android.iap.amazon.AmazonIapUtils]].
  *
- * TODO: Create rx observables that get new values when
- * the callbacks are called. Futures are one-off and a bad
- * match for this API.
+ * TODO: Create rx observables that get new values when the callbacks are called. Futures are one-off and a bad match
+ * for this API.
  *
  * @author mle
  */
@@ -107,7 +104,6 @@ class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) w
     }
     tryFailure(ex, purchasePromise)
   }
-
 }
 
 class AmazonPurchaseException(msg: String, val response: PurchaseResponse) extends IapException(msg)

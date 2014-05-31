@@ -6,7 +6,7 @@ import android.content.Context
 import android.app.DownloadManager._
 import android.database.Cursor
 import android.net.Uri
-import com.mle.util.{Utils, Scheduling}
+import com.mle.util.Scheduling
 import concurrent.duration._
 
 /**
@@ -57,9 +57,15 @@ trait DownloadHelper {
     val query = new DownloadManager.Query()
       .setFilterByStatus(STATUS_RUNNING)
     // STATUS_FAILED STATUS_SUCCESSFUL STATUS_PAUSED STATUS_PENDING
-    // Is it necessary to wrap this in an Option? query might return null, what?
-    val cursorOpt = Option(downloadManager.query(query))
-    cursorOpt.map(c => Utils.using(c)(cursor => map(c, readStatus).flatten)).getOrElse(Seq.empty)
+    // query might return null
+    val cursorOpt: Option[Cursor] = Option(downloadManager.query(query))
+    cursorOpt.fold(Seq.empty[DownloadStatus])(c => {
+      try {
+        map(c, readStatus).flatten
+      } finally {
+        c.close()
+      }
+    })
   }
 
   /**
@@ -95,11 +101,15 @@ trait DownloadHelper {
 
   def queryStatus(id: Long): Option[DownloadStatus] = {
     val query = new DownloadManager.Query().setFilterById(id)
-    Utils.using(downloadManager query query)(cursor => {
-      if (cursor.moveToFirst()) {
-        readStatus(cursor)
-      } else {
-        None
+    Option(downloadManager query query).flatMap(cursor => {
+      try {
+        if (cursor.moveToFirst()) {
+          readStatus(cursor)
+        } else {
+          None
+        }
+      } finally {
+        cursor.close()
       }
     })
   }
