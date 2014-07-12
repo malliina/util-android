@@ -1,27 +1,23 @@
 package com.mle.android.iap.google
 
-import com.android.iab.util._
-import scala.concurrent.Future
-import scala.concurrent.promise
-import com.android.iab.util.IabHelper.{OnIabPurchaseFinishedListener, QueryInventoryFinishedListener, OnIabSetupFinishedListener}
-import scala.util.Try
-import collection.JavaConversions._
-import android.app.Activity
-import com.mle.util.Utils
-import Utils.executionContext
-import java.util.UUID
-import com.mle.util.Utils
-import com.mle.android.iap.IapException
 import java.io.Closeable
-import scala.util.Failure
-import scala.Some
-import scala.util.Success
+import java.util.UUID
+
+import android.app.Activity
+import com.android.iab.util.IabHelper.{OnIabPurchaseFinishedListener, OnIabSetupFinishedListener, QueryInventoryFinishedListener}
+import com.android.iab.util._
+import com.mle.android.iap.IapException
+import com.mle.util.Utils
+import com.mle.util.Utils.executionContext
+
+import scala.collection.JavaConversions._
+import scala.concurrent.{Future, Promise}
+import scala.util.{Failure, Success, Try}
 
 /**
  * Converts Google Play's callback-based IAB API to one based on [[scala.concurrent.Future]]s.
  *
- * The UI thread is used to submit the asynchronous requests; exceptions are apparently thrown
- * otherwise.
+ * The UI thread is used to submit the asynchronous requests; exceptions are apparently thrown otherwise.
  *
  * @author mle
  */
@@ -30,15 +26,17 @@ class AsyncIabHelper(activity: Activity, val iabHelper: IabHelper) extends Close
 
   // not sure why I need to specify the types
 
-  def startSetup: Future[IabResult] =
+  // This future must complete before we run any IAB queries, therefore this class wraps calls in `ensureSetupComplete`
+  val startSetup: Future[IabResult] =
     makeFuture[IabResult, SetupListener](new SetupListener)(iabHelper.startSetup)
 
   /**
    * @param sku the product ID
    * @return true if the currently signed in user owns SKU `sku`, false otherwise
    */
-  def hasPurchase(sku: String): Future[Boolean] =
+  def hasPurchase(sku: String): Future[Boolean] = ensureSetupComplete {
     inventoryFuture(iabHelper.queryInventoryAsync).map(_.hasPurchase(sku))
+  }
 
   /**
    * Queries for details of the items with the SKUs given in `skus`.
@@ -50,8 +48,9 @@ class AsyncIabHelper(activity: Activity, val iabHelper: IabHelper) extends Close
    * @param querySkuDetails whether to return SKU details ("should be set to `true`")
    * @return details of `skus`
    */
-  def inventory(skus: Seq[String], querySkuDetails: Boolean = true): Future[Inventory] =
+  def inventory(skus: Seq[String], querySkuDetails: Boolean = true): Future[Inventory] = ensureSetupComplete {
     inventoryFuture(listener => iabHelper.queryInventoryAsync(querySkuDetails, skus, listener))
+  }
 
   def productDetails(sku: String): Future[SkuDetails] = inventory(Seq(sku)).map(_.getSkuDetails(sku))
 
@@ -60,9 +59,9 @@ class AsyncIabHelper(activity: Activity, val iabHelper: IabHelper) extends Close
    *
    * The string `payload` will be returned in subsequent queries about this purchase.
    *
-   * The returned future only completes successfully if the IabResult is successful and
-   * the developer payload of the returned `Purchase` matches `payload`. If the payloads
-   * don't match, the future fails with a [[com.mle.android.iap.google.PayloadMismatchException]].
+   * The returned future only completes successfully if the IabResult is successful and the developer payload of the
+   * returned `Purchase` matches `payload`. If the payloads don't match, the future fails with a
+   * [[com.mle.android.iap.google.PayloadMismatchException]].
    *
    * @param activity your activity
    * @param sku SKU of item to purchase
@@ -72,13 +71,14 @@ class AsyncIabHelper(activity: Activity, val iabHelper: IabHelper) extends Close
    * @see http://developer.android.com/training/in-app-billing/purchase-iab-products.html
    */
   def purchase(activity: Activity, sku: String, requestCode: Int, payload: String): Future[Purchase] =
-    makeFuture[Purchase, PurchaseListener](new PayloadVerifyingPurchaseListener(payload))(listener => {
-      iabHelper.launchPurchaseFlow(activity, sku, requestCode, listener, payload)
-    })
+    ensureSetupComplete {
+      makeFuture[Purchase, PurchaseListener](new PayloadVerifyingPurchaseListener(payload))(listener => {
+        iabHelper.launchPurchaseFlow(activity, sku, requestCode, listener, payload)
+      })
+    }
 
   def purchase(activity: Activity, sku: String, requestCode: Int): Future[Purchase] =
     purchase(activity, sku, requestCode, UUID.randomUUID().toString)
-
 
   def close(): Unit = iabHelper.dispose()
 
@@ -91,13 +91,15 @@ class AsyncIabHelper(activity: Activity, val iabHelper: IabHelper) extends Close
     }
   }
 
+  private def ensureSetupComplete[T](f: => Future[T]): Future[T] = startSetup flatMap (_ => f)
+
   private def inventoryFuture(f: InventoryListener => Unit): Future[Inventory] =
     makeFuture[Inventory, InventoryListener](new InventoryListener)(f)
 
   /**
-   * Operations on [[com.android.iab.util.IabHelper]] may throw [[java.lang.NullPointerException]]
-   * if the device does not have Google Play installed. (For example, when the app runs on the
-   * emulator.) This method executes `f` and should any exception be thrown, fails the resulting future.
+   * Operations on [[com.android.iab.util.IabHelper]] may throw [[java.lang.NullPointerException]] if the device does
+   * not have Google Play installed. (For example, when the app runs on the emulator.) This method executes `f` and
+   * should any exception be thrown, fails the resulting future.
    *
    * @param f IAB code to run
    * @tparam T desired result type, for example [[com.android.iab.util.Purchase]]
@@ -130,7 +132,7 @@ class AsyncIabHelper(activity: Activity, val iabHelper: IabHelper) extends Close
   }
 
   trait FutureBuilder[T] {
-    val p = promise[T]()
+    val p = Promise[T]()
 
     def handle(result: IabResult, item: T): Unit =
       if (result.isSuccess) p trySuccess item

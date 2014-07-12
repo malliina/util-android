@@ -8,7 +8,7 @@ object UtilBuild extends Build {
   lazy val utilProject = SbtUtils.testableProject("util-android").settings(utilSettings: _*)
   lazy val utilSettings = android.Plugin.androidBuild ++ publishSettings ++
     net.virtualvoid.sbt.graph.Plugin.graphSettings ++ Seq(
-    version := "0.8.3",
+    version := "0.8.4",
     scalaVersion := "2.11.1",
     crossScalaVersions := Seq("2.11.1", "2.10.4"),
     platformTarget in Android := "android-19",
