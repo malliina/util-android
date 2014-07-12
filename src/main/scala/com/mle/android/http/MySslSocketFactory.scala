@@ -9,8 +9,7 @@ import java.net.Socket
 /**
  * A socket factory that trusts all certificates.
  *
- * Useful for building client applications that should work with
- * servers that run with self-signed certificates.
+ * Useful for building client applications that should work with servers that use self-signed certificates.
  *
  * @see http://stackoverflow.com/questions/11573108/self-signed-certificate-and-loopj-for-android
  *
@@ -27,9 +26,8 @@ class MySslSocketFactory(trust: KeyStore) extends SSLSocketFactory(trust) {
 
 object MySslSocketFactory {
   /**
-   * Builds and initializes an [[javax.net.ssl.SSLContext]] that
-   * trusts all certificates. Use this with SSL-enabled clients
-   * that speak to servers with self-signed certificates.
+   * Builds and initializes an [[javax.net.ssl.SSLContext]] that trusts all certificates. Use this with SSL-enabled
+   * clients that speak to servers with self-signed certificates.
    *
    * MITM BLAH BLAH BLAH
    *

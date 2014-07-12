@@ -18,9 +18,8 @@ trait JsonHttpClient extends FutureHttpClient with UtilLog {
   /**
    * HTTP GETs `uri` and maps the JSON in the response content to type `T`.
    *
-   * The returned [[Future]] fails with a [[JsResultException]] if the non-empty
-   * response content fails to map to `T`. Empty responses fail with a [[AndroidException]].
-   * May also fail with any exception `get` may fail with.
+   * The returned [[Future]] fails with a [[JsResultException]] if the non-empty response content fails to map to `T`.
+   * Empty responses fail with a [[AndroidException]]. May also fail with any exception `get` may fail with.
    *
    * @param uri uri to GET
    * @param fjs JSON reader

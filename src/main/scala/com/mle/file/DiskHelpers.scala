@@ -31,8 +31,7 @@ trait DiskHelpers {
       }
     })
 
-  def free(dir: File, amount: StorageSize): StorageSize =
-    free(dir, amount.toBytes).bytes
+  def free(dir: File, amount: StorageSize): StorageSize = free(dir, amount.toBytes).bytes
 
   /**
    * Deletes files under `dir` until `bytes` bytes has been deleted.
@@ -63,8 +62,7 @@ trait DiskHelpers {
    */
   def deleteEmptyDirs(dir: File): Unit = {
 
-    def deleteSubDirs(parent: File): Unit =
-      parent.listFiles().filter(_.isDirectory).foreach(deleteDirs)
+    def deleteSubDirs(parent: File): Unit = parent.listFiles().filter(_.isDirectory).foreach(deleteDirs)
 
     def deleteDirs(subDir: File): Unit = {
       // DFS
@@ -79,8 +77,7 @@ trait DiskHelpers {
     }
   }
 
-  def deleteEmptyDirsFuture(dir: File): Future[Unit] =
-    concurrent.future(deleteEmptyDirs(dir))
+  def deleteEmptyDirsFuture(dir: File): Future[Unit] = Future(deleteEmptyDirs(dir))
 
   def dirSize(dir: File): Long =
     if (dir.exists() && dir.isDirectory) {
@@ -92,12 +89,9 @@ trait DiskHelpers {
       throw new FileNotFoundException(dir.getAbsolutePath)
     }
 
-  def storageSize(dir: File): StorageSize =
-    dirSize(dir).bytes
+  def storageSize(dir: File): StorageSize = dirSize(dir).bytes
 
-  def dirSizeFuture(dir: File): Future[Long] =
-    concurrent.future(dirSize(dir))
+  def dirSizeFuture(dir: File): Future[Long] = Future(dirSize(dir))
 
-  def storageSizeFuture(dir: File): Future[StorageSize] =
-    dirSizeFuture(dir).map(_.bytes)
+  def storageSizeFuture(dir: File): Future[StorageSize] = dirSizeFuture(dir).map(_.bytes)
 }
