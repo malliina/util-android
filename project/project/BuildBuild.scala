@@ -4,7 +4,6 @@ import sbt._
 object BuildBuild extends Build {
   override lazy val settings = super.settings ++ Seq(
     scalaVersion := "2.10.4",
-    sbtVersion := "0.13.2",
     scalacOptions ++= Seq("-unchecked", "-deprecation")
   ) ++ sbtPlugins
 

@@ -1,14 +1,15 @@
 package com.mle.android.http
 
-import com.mle.android.util.UtilLog
-import play.api.libs.json.{JsValue, JsResultException, Json, Reads}
-import scala.concurrent.{Promise, Future}
-import com.mle.android.exceptions.AndroidException
-import com.mle.util.Utils.executionContext
 import android.content.Context
 import com.loopj.android.http.AsyncHttpResponseHandler
+import com.mle.android.exceptions.AndroidException
+import com.mle.android.util.UtilLog
 import com.mle.concurrent.Futures
+import com.mle.util.Utils.executionContext
 import org.apache.http.entity.StringEntity
+import play.api.libs.json.{JsResultException, JsValue, Json, Reads}
+
+import scala.concurrent.{Future, Promise}
 
 /**
  *
@@ -40,7 +41,7 @@ trait JsonHttpClient extends FutureHttpClient with UtilLog {
     })
 
   def post(ctx: Context, uri: String, json: JsValue): Future[HttpResponse] =
-    post(ctx, uri, json, buildResponseHandler)
+    post(ctx, uri, json, textResponseHandler)
 
   def post[T](ctx: Context, uri: String, json: JsValue, f: Promise[T] => AsyncHttpResponseHandler): Future[T] =
     Futures.promisedFuture[T](p => {

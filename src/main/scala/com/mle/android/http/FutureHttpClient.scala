@@ -1,14 +1,17 @@
 package com.mle.android.http
 
-import com.loopj.android.http.{RequestParams, AsyncHttpResponseHandler, AsyncHttpClient}
-import scala.concurrent.{Promise, Future}
-import com.mle.concurrent.Futures
-import org.apache.http.client.HttpResponseException
+import java.io.{Closeable, File}
+
+import com.loopj.android.http._
 import com.mle.android.exceptions.{NotFoundHttpException, UnauthorizedHttpException}
 import com.mle.android.util.UtilLog
-import java.io.{File, Closeable}
-import scala.util.Try
+import com.mle.concurrent.Futures
 import com.mle.util.Utils.executionContext
+import org.apache.http.Header
+import org.apache.http.client.HttpResponseException
+
+import scala.concurrent.{Future, Promise}
+import scala.util.Try
 
 /**
  *
@@ -42,22 +45,21 @@ trait FutureHttpClient extends UtilLog with Closeable {
   /**
    * GETs `uri`.
    *
-   * The returned [[Future]] fails with an [[java.io.IOException]] if
-   * the server cannot be reached, an [[UnauthorizedHttpException]] if
-   * authentication fails and a [[NotFoundHttpException]] if the server
-   * responds with a 404. For other errors it may fail with a
-   * [[HttpResponseException]] containing the appropriate error code.
+   * The returned [[Future]] fails with an [[java.io.IOException]] if the server cannot be reached, an
+   * [[UnauthorizedHttpException]] if authentication fails and a [[NotFoundHttpException]] if the server responds with a
+   * 404. For other errors it may fail with a [[HttpResponseException]] containing the appropriate error code.
    *
    * @param uri request uri
    * @return the HTTP response following a successful request
    */
-  def get(uri: String): Future[HttpResponse] = get(uri, buildResponseHandler)
+  def get(uri: String): Future[HttpResponse] = get(uri, textResponseHandler)
 
   def get[T](uri: String, f: Promise[T] => AsyncHttpResponseHandler): Future[T] =
     Futures.promisedFuture[T](p => httpClient.get(transformUri(uri), f(p)))
 
-  def postFile(resource: String, file: File): Future[HttpResponse] =
-    postFile(resource, file, buildResponseHandler)
+  def getFile(uri: String, file: File): Future[File] = get[File](uri, p => fileResponseHandler(file, p))
+
+  def postFile(resource: String, file: File): Future[HttpResponse] = postFile(resource, file, textResponseHandler)
 
   /**
    * Performs a multipart/form-data upload of `file`.
@@ -71,15 +73,23 @@ trait FutureHttpClient extends UtilLog with Closeable {
       httpClient.post(transformUri(uri), params, f(p))
     })
 
-  def buildResponseHandler(promise: Promise[HttpResponse]) = new AsyncHttpResponseHandler {
-    override def onSuccess(statusCode: Int, content: String): Unit = {
-      //      info(s"Success: $content")
-      promise success HttpResponse(statusCode, Option(content))
+  def textResponseHandler(promise: Promise[HttpResponse]) = new TextHttpResponseHandler() {
+    override def onSuccess(statusCode: Int, headers: Array[Header], responseString: String): Unit = {
+      promise success HttpResponse(statusCode, Option(responseString))
     }
 
-    override def onFailure(t: Throwable, content: String): Unit = {
-      //      info(s"Failure: ${t.getMessage}")
-      promise failure handleFailure(t, Option(content))
+    override def onFailure(statusCode: Int, headers: Array[Header], responseString: String, throwable: Throwable): Unit = {
+      promise failure handleFailure(throwable, Option(responseString))
+    }
+  }
+
+  def fileResponseHandler(file: File, promise: Promise[File]) = new FileAsyncHttpResponseHandler(file) {
+    override def onSuccess(statusCode: Int, headers: Array[Header], file: File): Unit = {
+      promise success file
+    }
+
+    override def onFailure(statusCode: Int, headers: Array[Header], throwable: Throwable, file: File): Unit = {
+      promise failure handleFailure(throwable, None)
     }
   }
 

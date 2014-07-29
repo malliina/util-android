@@ -8,15 +8,15 @@ object UtilBuild extends Build {
   lazy val utilProject = SbtUtils.testableProject("util-android").settings(utilSettings: _*)
   lazy val utilSettings = android.Plugin.androidBuild ++ publishSettings ++
     net.virtualvoid.sbt.graph.Plugin.graphSettings ++ Seq(
-    version := "0.8.9",
-    scalaVersion := "2.11.1",
-    crossScalaVersions := Seq("2.11.1", "2.10.4"),
+    version := "0.9.0",
+    scalaVersion := "2.11.2",
+    crossScalaVersions := Seq("2.11.2", "2.10.4"),
     platformTarget in Android := "android-19",
     libraryProject := true,
     libraryDependencies ++= Seq(
       "com.android.support" % "support-v4" % "19.1.0",
-      "com.typesafe.play" %% "play-json" % "2.3.1",
-      "com.loopj.android" % "android-async-http" % "1.4.4",
+      "com.typesafe.play" %% "play-json" % "2.3.2",
+      "com.loopj.android" % "android-async-http" % "1.4.5",
       "org.java-websocket" % "Java-WebSocket" % "1.3.0",
       "com.github.malliina" %% "util-base" % "0.2.0"
     ),
