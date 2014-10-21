@@ -5,8 +5,8 @@ import java.io.{Closeable, File}
 import com.loopj.android.http._
 import com.mle.android.exceptions.{NotFoundHttpException, UnauthorizedHttpException}
 import com.mle.android.util.UtilLog
+import com.mle.concurrent.ExecutionContexts.cached
 import com.mle.concurrent.Futures
-import com.mle.util.Utils.executionContext
 import org.apache.http.Header
 import org.apache.http.client.HttpResponseException
 

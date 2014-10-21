@@ -4,8 +4,8 @@ import android.content.Context
 import com.loopj.android.http.AsyncHttpResponseHandler
 import com.mle.android.exceptions.AndroidException
 import com.mle.android.util.UtilLog
+import com.mle.concurrent.ExecutionContexts.cached
 import com.mle.concurrent.Futures
-import com.mle.util.Utils.executionContext
 import org.apache.http.entity.StringEntity
 import play.api.libs.json.{JsResultException, JsValue, Json, Reads}
 

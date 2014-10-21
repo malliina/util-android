@@ -7,8 +7,8 @@ import android.app.Activity
 import com.android.iab.util.IabHelper.{OnIabPurchaseFinishedListener, OnIabSetupFinishedListener, QueryInventoryFinishedListener}
 import com.android.iab.util._
 import com.mle.android.iap.IapException
+import com.mle.concurrent.ExecutionContexts.cached
 import com.mle.util.Utils
-import com.mle.util.Utils.executionContext
 
 import scala.collection.JavaConversions._
 import scala.concurrent.{Future, Promise}

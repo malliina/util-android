@@ -1,13 +1,13 @@
 package com.mle.android.iap.amazon
 
 import android.content.Context
-import com.amazon.inapp.purchasing._
-import scala.concurrent.promise
-import com.mle.util.Utils
-import Utils.executionContext
-import com.mle.android.iap._
-import com.mle.concurrent.PromiseHelpers
 import com.amazon.inapp.purchasing.ItemDataResponse.ItemDataRequestStatus
+import com.amazon.inapp.purchasing._
+import com.mle.android.iap._
+import com.mle.concurrent.ExecutionContexts.cached
+import com.mle.concurrent.PromiseHelpers
+
+import scala.concurrent.Promise
 
 /**
  * This class registers itself as the observer for the [[com.amazon.inapp.purchasing.PurchasingManager]] upon
@@ -26,12 +26,12 @@ class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) w
   private val itemStatusFailureMessage = "Unable to read item data."
   private val getUserFailureMessage = "Unable to read the current user ID."
 
-  private val isSandboxPromise = promise[Boolean]()
-  private val userIdPromise = promise[String]()
-  private val entitledPromise = promise[Set[String]]()
-  private val revokedPromise = promise[Set[String]]()
-  private val purchasePromise = promise[String]()
-  private val availableItemsPromise = promise[Set[ProductInfo]]()
+  private val isSandboxPromise = Promise[Boolean]()
+  private val userIdPromise = Promise[String]()
+  private val entitledPromise = Promise[Set[String]]()
+  private val revokedPromise = Promise[Set[String]]()
+  private val purchasePromise = Promise[String]()
+  private val availableItemsPromise = Promise[Set[ProductInfo]]()
 
   val isSandbox = isSandboxPromise.future
   val entitledSkus = entitledPromise.future
@@ -83,7 +83,7 @@ class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) w
   override def onItemDataResponse(response: ItemDataResponse): Unit = {
     super.onItemDataResponse(response)
     if (response.getItemDataRequestStatus == ItemDataRequestStatus.SUCCESSFUL) {
-      import collection.JavaConversions._
+      import scala.collection.JavaConversions._
       val infos = response.getItemData.values()
         .map(item => ProductInfo(item.getSku, item.getPrice, item.getTitle, item.getDescription)).toSet
       trySuccess(infos, availableItemsPromise)

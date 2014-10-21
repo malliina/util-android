@@ -1,11 +1,11 @@
 package com.mle.android.iap.amazon
 
-import com.mle.android.iap.{ProductInfo, IapUtilsBase}
 import android.app.Activity
-import scala.concurrent.Future
 import com.amazon.inapp.purchasing.{Offset, PurchasingManager}
-import com.mle.util.Utils
-import Utils.executionContext
+import com.mle.android.iap.{IapUtilsBase, ProductInfo}
+import com.mle.concurrent.ExecutionContexts.cached
+
+import scala.concurrent.Future
 
 /**
  *
@@ -21,7 +21,7 @@ trait AmazonIapUtils extends IapUtilsBase {
     skus(activity).map(_ contains sku)
 
   override def productInfo(sku: String, activity: Activity): Future[ProductInfo] = withIAP(activity, iap => {
-    import collection.JavaConversions._
+    import scala.collection.JavaConversions._
     PurchasingManager.initiateItemDataRequest(Set(sku))
     iap.availableItems.flatMap(skus => skus.headOption.fold(Future.failed[ProductInfo](new NoSuchElementException))(s => Future.successful(s)))
   })

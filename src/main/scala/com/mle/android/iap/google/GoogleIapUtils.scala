@@ -3,7 +3,7 @@ package com.mle.android.iap.google
 import android.app.Activity
 import com.android.iab.util.IabHelper
 import com.mle.android.iap.{IapUtilsBase, ProductInfo}
-import com.mle.util.Utils.executionContext
+import com.mle.concurrent.ExecutionContexts.cached
 
 import scala.concurrent.Future
 import scala.util.Try
