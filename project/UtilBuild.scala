@@ -8,7 +8,7 @@ object UtilBuild extends Build {
   lazy val utilProject = SbtProjects.mavenPublishProject("util-android").settings(utilSettings: _*)
   lazy val utilSettings = android.Plugin.androidBuild ++ publishSettings ++
     net.virtualvoid.sbt.graph.Plugin.graphSettings ++ Seq(
-    version := "0.9.3",
+    version := "0.9.4",
     scalaVersion := "2.11.2",
     crossScalaVersions := Seq("2.11.2", "2.10.4"),
     platformTarget in Android := "android-19",
@@ -23,7 +23,9 @@ object UtilBuild extends Build {
     // android-sdk-plugin sets these to false, but we want to create jars for maven
     (publishArtifact in packageBin in Compile) := true,
     (publishArtifact in packageSrc in Compile) := true,
-    resolvers += "typesafe releases" at "http://repo.typesafe.com/typesafe/releases/"
+    resolvers += "typesafe releases" at "http://repo.typesafe.com/typesafe/releases/",
+    javacOptions ++= Seq("-source", "1.6", "-target", "1.6"),
+    scalacOptions += "-target:jvm-1.6"
   )
 
   import SbtUtils._
