@@ -1,4 +1,4 @@
-# util-android #
+# util-android
 
 Utility code for Android, in Scala. Contains:
 

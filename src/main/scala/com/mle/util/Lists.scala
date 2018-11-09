@@ -1,9 +1,5 @@
 package com.mle.util
 
-/**
- *
- * @author mle
- */
 object Lists {
   def interleave[T](left: List[T], right: List[T]): List[T] =
     if (left.isEmpty) right

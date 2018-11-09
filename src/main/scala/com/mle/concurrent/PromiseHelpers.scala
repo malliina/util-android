@@ -3,10 +3,6 @@ package com.mle.concurrent
 import scala.concurrent.Promise
 import scala.util.Try
 
-/**
- *
- * @author mle
- */
 trait PromiseHelpers {
   // Defensive coding
 

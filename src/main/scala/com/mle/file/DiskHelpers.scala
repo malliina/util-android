@@ -7,17 +7,13 @@ import com.mle.storage._
 
 import scala.concurrent.Future
 
-/**
- *
- * @author mle
- */
 trait DiskHelpers {
   /**
-   * @param rootDir directory from which to delete files
-   * @param maxSize maximum allowed size of directory
-   * @param deleteAmount amount of data to delete if the directory size exceeds `maxSize`
-   * @return the amount of data deleted
-   */
+    * @param rootDir      directory from which to delete files
+    * @param maxSize      maximum allowed size of directory
+    * @param deleteAmount amount of data to delete if the directory size exceeds `maxSize`
+    * @return the amount of data deleted
+    */
   def maintainDirSize(rootDir: File, maxSize: StorageSize, deleteAmount: StorageSize = 500.megs): Future[StorageSize] =
     storageSizeFuture(rootDir).map(currentSize => {
       if (currentSize > maxSize) {
@@ -34,15 +30,14 @@ trait DiskHelpers {
 
   def free(dir: File, amount: StorageSize): StorageSize = free(dir, amount.toBytes).bytes
 
-  /**
-   * Deletes files under `dir` until `bytes` bytes has been deleted.
-   *
-   * May delete recursively if required.
-   *
-   * @param dir root dir from which to delete files
-   * @param bytes the amount of data to delete
-   * @return the number of bytes deleted
-   */
+  /** Deletes files under `dir` until `bytes` bytes has been deleted.
+    *
+    * May delete recursively if required.
+    *
+    * @param dir   root dir from which to delete files
+    * @param bytes the amount of data to delete
+    * @return the number of bytes deleted
+    */
   def free(dir: File, bytes: Long): Long =
     dir.listFiles().foldLeft(0L)((acc, path) => {
       if (acc > bytes) acc
@@ -56,11 +51,10 @@ trait DiskHelpers {
       }
     })
 
-  /**
-   * Deletes empty directories under `dir`, but not `dir` itself even if it is empty.
-   *
-   * @param dir the root directory to traverse, deleting empty dirs underneath
-   */
+  /** Deletes empty directories under `dir`, but not `dir` itself even if it is empty.
+    *
+    * @param dir the root directory to traverse, deleting empty dirs underneath
+    */
   def deleteEmptyDirs(dir: File): Unit = {
 
     def deleteSubDirs(parent: File): Unit = parent.listFiles().filter(_.isDirectory).foreach(deleteDirs)
