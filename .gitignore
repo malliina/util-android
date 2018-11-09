@@ -6,3 +6,5 @@ target/
 .idea_modules/
 *.log
 local.properties
+.d
+proguard-sbt.txt

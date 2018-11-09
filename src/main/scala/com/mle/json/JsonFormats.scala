@@ -1,22 +1,17 @@
 package com.mle.json
 
-import play.api.libs.json._
+import com.mle.storage.{StorageLong, StorageSize}
 import play.api.libs.json.Json._
-import scala.concurrent.duration._
-import com.mle.storage.StorageSize
-import com.mle.storage.StorageLong
+import play.api.libs.json._
 
-/**
- *
- * @author mle
- */
+import scala.concurrent.duration._
+
 trait JsonFormats {
 
-  /**
-   * Serializes Duration to Long, deserializes Double to Duration.
-   *
-   * One second granularity.
-   */
+  /** Serializes Duration to Long, deserializes Double to Duration.
+    *
+    * One second granularity.
+    */
   implicit object duration extends Format[Duration] {
     def reads(json: JsValue): JsResult[Duration] =
       json.validate[Double].map(_.seconds)

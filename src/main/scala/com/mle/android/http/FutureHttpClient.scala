@@ -13,10 +13,6 @@ import org.apache.http.client.HttpResponseException
 import scala.concurrent.{Future, Promise}
 import scala.util.Try
 
-/**
- *
- * @author mle
- */
 trait FutureHttpClient extends UtilLog with Closeable {
   val httpClient = new AsyncHttpClient()
   httpClient setSSLSocketFactory MySslSocketFactory.allowAllCertificatesSocketFactory()
