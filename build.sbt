@@ -6,6 +6,7 @@ lazy val utilProject = SbtProjects.mavenPublishProject("util-android")
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
+organization := "com.malliina"
 version := "0.9.9"
 scalaVersion := "2.11.12"
 platformTarget in Android := "android-19"
