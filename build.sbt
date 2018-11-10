@@ -11,7 +11,7 @@ scalaVersion := "2.11.12"
 platformTarget in Android := "android-27"
 libraryProject := true
 libraryDependencies ++= Seq(
-  "com.android.support" % "support-v4" % "19.1.0",
+  "com.android.support" % "support-v4" % "23.0.0",
   "com.typesafe.play" %% "play-json" % "2.3.8",
   "com.loopj.android" % "android-async-http" % "1.4.9",
   "com.github.malliina" %% "util-base" % "0.6.0"
