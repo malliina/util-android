@@ -12,9 +12,8 @@ platformTarget in Android := "android-27"
 libraryProject := true
 libraryDependencies ++= Seq(
   "com.android.support" % "support-v4" % "23.0.0",
-  "com.typesafe.play" %% "play-json" % "2.3.8",
   "com.loopj.android" % "android-async-http" % "1.4.9",
-  "com.github.malliina" %% "util-base" % "0.6.0"
+  "com.github.malliina" %% "util-base" % "0.6.200"
 )
 // android-sdk-plugin sets these to false, but we want to create jars for maven
 publishArtifact in packageBin in Compile := true
@@ -26,9 +25,6 @@ resolvers ++= Seq(
 javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
 scalacOptions += "-target:jvm-1.6"
 
-
 developerName := "Michael Skogberg"
-
 gitUserName := "malliina"
-
 developerHomePageUrl := "http://mskogberg.info"
