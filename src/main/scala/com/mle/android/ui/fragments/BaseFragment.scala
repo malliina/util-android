@@ -8,5 +8,5 @@ import android.app.Activity
 trait BaseFragment extends Fragment with ActivityUtils {
   def activity: Activity = getActivity
 
-  def findViewById(id: Int): View = activity findViewById id
+  def findViewById(id: Int): View = activity.findViewById[View](id)
 }

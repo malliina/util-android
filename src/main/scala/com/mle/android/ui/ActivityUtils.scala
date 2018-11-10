@@ -1,11 +1,11 @@
 package com.mle.android.ui
 
 import android.app.Activity
-import android.preference.PreferenceManager
 import android.content.Intent
+import android.preference.PreferenceManager
+import android.view.View
 import android.widget.Toast
 import com.mle.util.Utils
-import android.support.v4.app.DialogFragment
 
 trait ActivityUtils {
   def activity: Activity
@@ -16,10 +16,10 @@ trait ActivityUtils {
 
   def findPrefs = findActivity.map(PreferenceManager.getDefaultSharedPreferences)
 
-  def tryFindView[A](id: Int): Option[A] =
+  def tryFindView[A <: View](id: Int): Option[A] =
     for {
       a <- findActivity
-      view <- Option(a findViewById id)
+      view <- Option(a.findViewById[A](id))
     } yield view.asInstanceOf[A]
 
   def navigate[T <: Activity](destActivity: Class[T], parameters: (String, String)*) {
@@ -32,7 +32,7 @@ trait ActivityUtils {
 
   def navigateForResult[T <: Activity](destActivity: Class[T], requestCode: Int) {
     val intent = new Intent(activity, destActivity)
-    activity startActivityForResult(intent, requestCode)
+    activity.startActivityForResult(intent, requestCode)
   }
 
   def onUiThread(f: => Any): Unit = activity.runOnUiThread(Utils.runnable(f))
