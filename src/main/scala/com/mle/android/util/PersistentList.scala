@@ -6,10 +6,6 @@ import play.api.libs.json.Json._
 import com.mle.android.util.PreferenceImplicits._
 import play.api.libs.json.Format
 
-/**
- *
- * @author mle
- */
 class PersistentList[T](ctx: Context, key: String, maxSize: Int = 100)(implicit val format: Format[T]) {
   def prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
 

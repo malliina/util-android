@@ -6,10 +6,6 @@ import android.content.DialogInterface
 import com.mle.android.ui.Implicits
 import Implicits._
 
-/**
- *
- * @author mle
- */
 trait AbstractDialog extends BaseDialogFragment {
   def message: Int
 

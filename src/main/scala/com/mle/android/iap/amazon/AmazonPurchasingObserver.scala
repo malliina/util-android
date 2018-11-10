@@ -8,10 +8,6 @@ import com.amazon.inapp.purchasing.Item.ItemType
 import com.amazon.inapp.purchasing.PurchaseResponse.PurchaseRequestStatus
 import com.mle.android.util.UtilLog
 
-/**
- *
- * @author mle
- */
 abstract class AmazonPurchasingObserver(ctx: Context) extends BasePurchasingObserver(ctx) with UtilLog {
   def onUserId(userId: String)
 

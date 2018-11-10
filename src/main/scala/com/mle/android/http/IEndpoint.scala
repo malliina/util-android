@@ -1,9 +1,5 @@
 package com.mle.android.http
 
-/**
- *
- * @author mle
- */
 trait IEndpoint {
   def name: String
 

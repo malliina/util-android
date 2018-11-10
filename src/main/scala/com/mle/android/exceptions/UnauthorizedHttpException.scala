@@ -1,11 +1,7 @@
 package com.mle.android.exceptions
 
-import org.apache.http.client.HttpResponseException
+import cz.msebera.android.httpclient.client.HttpResponseException
 
-/**
- *
- * @author mle
- */
 class UnauthorizedHttpException(cause: HttpResponseException)
   extends ExplainedHttpException(None, cause) {
   override val reason = "Unauthorized. Check your credentials."

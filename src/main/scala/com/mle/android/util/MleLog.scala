@@ -2,10 +2,6 @@ package com.mle.android.util
 
 import android.util.Log
 
-/**
- *
- * @author mle
- */
 trait MleLog {
 
   def tag: String
@@ -25,11 +21,12 @@ trait MleLog {
 
   protected def failMessage(e: Throwable, stackTrace: Boolean = true): String = {
     val exName = e.getClass.getName
-    val explanation = Option(e.getMessage).filter(_.trim.size > 0).fold("")(msg => s": $msg")
+    val explanation = Option(e.getMessage).filter(_.trim.nonEmpty).fold("")(msg => s": $msg")
     if (stackTrace) s"$exName$explanation\n${e.getStackTraceString}"
     else s"$exName$explanation"
   }
 }
+
 trait UtilLog extends MleLog {
   def tag: String = "com.mle.android"
 }

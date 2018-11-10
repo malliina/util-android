@@ -9,10 +9,6 @@ import android.net.Uri
 import com.mle.util.Scheduling
 import concurrent.duration._
 
-/**
- *
- * @author mle
- */
 trait DownloadHelper {
   private var poller: Option[ScheduledFuture[_]] = None
 
@@ -35,7 +31,7 @@ trait DownloadHelper {
 
   def startPollDownloadProgress() {
     stopPollDownloadProgress()
-    val task = Scheduling.every(1000 milliseconds) {
+    val task = Scheduling.every(1000.milliseconds) {
       try {
         //        debug("Querying download progress...")
         val downloadStatuses = runningDownloads()

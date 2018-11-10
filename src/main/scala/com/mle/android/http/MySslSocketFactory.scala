@@ -1,7 +1,7 @@
 package com.mle.android.http
 
-import javax.net.ssl.{TrustManager, X509TrustManager, SSLContext}
-import org.apache.http.conn.ssl.SSLSocketFactory
+import cz.msebera.android.httpclient.conn.ssl.SSLSocketFactory
+import javax.net.ssl.{SSLContext, TrustManager, X509TrustManager}
 import java.security.KeyStore
 import java.security.cert.X509Certificate
 import java.net.Socket

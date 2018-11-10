@@ -9,10 +9,6 @@ import android.widget.AdapterView.OnItemClickListener
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.{Adapter, SeekBar, AdapterView}
 
-/**
- *
- * @author mle
- */
 object Implicits {
 
   implicit class RichAdapterView[T <: Adapter](val listener: AdapterView[T]) {

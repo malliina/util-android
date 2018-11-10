@@ -4,10 +4,6 @@ import android.app.Activity
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import com.mle.android.ui.ActivityUtils
 
-/**
- *
- * @author mle
- */
 trait PreferenceListening extends Activity with ActivityUtils with OnSharedPreferenceChangeListener {
 
   override def onResume() {

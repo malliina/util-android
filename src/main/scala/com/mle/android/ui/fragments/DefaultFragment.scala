@@ -3,10 +3,6 @@ package com.mle.android.ui.fragments
 import android.view.{View, ViewGroup, LayoutInflater}
 import android.os.Bundle
 
-/**
- *
- * @author mle
- */
 trait DefaultFragment extends BaseFragment {
   def layoutId: Int
 

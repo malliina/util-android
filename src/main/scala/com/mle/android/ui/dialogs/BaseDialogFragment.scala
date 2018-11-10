@@ -4,10 +4,6 @@ import android.support.v4.app.DialogFragment
 import android.os.Bundle
 import android.app.{AlertDialog, Dialog}
 
-/**
- *
- * @author mle
- */
 trait BaseDialogFragment extends DialogFragment {
   override def onCreateDialog(savedInstanceState: Bundle): Dialog = {
     val builder = new AlertDialog.Builder(getActivity)

@@ -1,9 +1,5 @@
 package com.mle.android.exceptions
 
-/**
- *
- * @author mle
- */
 abstract class ExplainedHttpException(content: Option[String], cause: Option[Throwable] = None)
   extends ExplainedException(content getOrElse "", cause) {
   def this(content: Option[String], cause: Throwable) = this(content, Some(cause))

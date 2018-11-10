@@ -14,13 +14,10 @@ import scala.collection.JavaConversions._
 import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success, Try}
 
-/**
- * Converts Google Play's callback-based IAB API to one based on [[scala.concurrent.Future]]s.
- *
- * The UI thread is used to submit the asynchronous requests; exceptions are apparently thrown otherwise.
- *
- * @author mle
- */
+/** Converts Google Play's callback-based IAB API to one based on [[scala.concurrent.Future]]s.
+  *
+  * The UI thread is used to submit the asynchronous requests; exceptions are apparently thrown otherwise.
+  */
 class AsyncIabHelper(activity: Activity, val iabHelper: IabHelper) extends Closeable {
   iabHelper enableDebugLogging true
 
@@ -31,45 +28,43 @@ class AsyncIabHelper(activity: Activity, val iabHelper: IabHelper) extends Close
     makeFuture[IabResult, SetupListener](new SetupListener)(iabHelper.startSetup)
 
   /**
-   * @param sku the product ID
-   * @return true if the currently signed in user owns SKU `sku`, false otherwise
-   */
+    * @param sku the product ID
+    * @return true if the currently signed in user owns SKU `sku`, false otherwise
+    */
   def hasPurchase(sku: String): Future[Boolean] = ensureSetupComplete {
     inventoryFuture(iabHelper.queryInventoryAsync).map(_.hasPurchase(sku))
   }
 
-  /**
-   * Queries for details of the items with the SKUs given in `skus`.
-   *
-   * Use this to query available (and possibly unowned) items: check the SKUs in
-   * advance from the Google Developer Console.
-   *
-   * @param skus the SKUs to query for
-   * @param querySkuDetails whether to return SKU details ("should be set to `true`")
-   * @return details of `skus`
-   */
+  /** Queries for details of the items with the SKUs given in `skus`.
+    *
+    * Use this to query available (and possibly unowned) items: check the SKUs in
+    * advance from the Google Developer Console.
+    *
+    * @param skus            the SKUs to query for
+    * @param querySkuDetails whether to return SKU details ("should be set to `true`")
+    * @return details of `skus`
+    */
   def inventory(skus: Seq[String], querySkuDetails: Boolean = true): Future[Inventory] = ensureSetupComplete {
     inventoryFuture(listener => iabHelper.queryInventoryAsync(querySkuDetails, skus, listener))
   }
 
   def productDetails(sku: String): Future[SkuDetails] = inventory(Seq(sku)).map(_.getSkuDetails(sku))
 
-  /**
-   * Purchases `sku`.
-   *
-   * The string `payload` will be returned in subsequent queries about this purchase.
-   *
-   * The returned future only completes successfully if the IabResult is successful and the developer payload of the
-   * returned `Purchase` matches `payload`. If the payloads don't match, the future fails with a
-   * [[com.mle.android.iap.google.PayloadMismatchException]].
-   *
-   * @param activity your activity
-   * @param sku SKU of item to purchase
-   * @param requestCode any positive integer; will be returned in onActivityResult with the purchase response
-   * @param payload supplemental information about the order; can be an empty string
-   * @return the purchase
-   * @see http://developer.android.com/training/in-app-billing/purchase-iab-products.html
-   */
+  /** Purchases `sku`.
+    *
+    * The string `payload` will be returned in subsequent queries about this purchase.
+    *
+    * The returned future only completes successfully if the IabResult is successful and the developer payload of the
+    * returned `Purchase` matches `payload`. If the payloads don't match, the future fails with a
+    * [[com.mle.android.iap.google.PayloadMismatchException]].
+    *
+    * @param activity    your activity
+    * @param sku         SKU of item to purchase
+    * @param requestCode any positive integer; will be returned in onActivityResult with the purchase response
+    * @param payload     supplemental information about the order; can be an empty string
+    * @return the purchase
+    * @see http://developer.android.com/training/in-app-billing/purchase-iab-products.html
+    */
   def purchase(activity: Activity, sku: String, requestCode: Int, payload: String): Future[Purchase] =
     ensureSetupComplete {
       makeFuture[Purchase, PurchaseListener](new PayloadVerifyingPurchaseListener(payload))(listener => {
@@ -97,29 +92,29 @@ class AsyncIabHelper(activity: Activity, val iabHelper: IabHelper) extends Close
     makeFuture[Inventory, InventoryListener](new InventoryListener)(f)
 
   /**
-   * Operations on [[com.android.iab.util.IabHelper]] may throw [[java.lang.NullPointerException]] if the device does
-   * not have Google Play installed. (For example, when the app runs on the emulator.) This method executes `f` and
-   * should any exception be thrown, fails the resulting future.
-   *
-   * @param f IAB code to run
-   * @tparam T desired result type, for example [[com.android.iab.util.Purchase]]
-   * @return the future result
-   */
+    * Operations on [[com.android.iab.util.IabHelper]] may throw [[java.lang.NullPointerException]] if the device does
+    * not have Google Play installed. (For example, when the app runs on the emulator.) This method executes `f` and
+    * should any exception be thrown, fails the resulting future.
+    *
+    * @param f IAB code to run
+    * @tparam T desired result type, for example [[com.android.iab.util.Purchase]]
+    * @return the future result
+    */
   private def withGooglePlay[T](f: => Future[T]): Future[T] = Try(f) match {
     case Success(fut) => fut
     case Failure(t) => Future.failed[T](new GooglePlayException("Google Play error. Ensure that Google Play is installed on the device.", t))
   }
 
   class SetupListener extends OnIabSetupFinishedListener with FutureBuilder[IabResult] {
-    def onIabSetupFinished(result: IabResult) = handle(result, result)
+    def onIabSetupFinished(result: IabResult): Unit = handle(result, result)
   }
 
   class InventoryListener extends QueryInventoryFinishedListener with FutureBuilder[Inventory] {
-    def onQueryInventoryFinished(result: IabResult, inv: Inventory) = handle(result, inv)
+    def onQueryInventoryFinished(result: IabResult, inv: Inventory): Unit = handle(result, inv)
   }
 
   class PurchaseListener extends OnIabPurchaseFinishedListener with FutureBuilder[Purchase] {
-    def onIabPurchaseFinished(result: IabResult, info: Purchase) = handle(result, info)
+    def onIabPurchaseFinished(result: IabResult, info: Purchase): Unit = handle(result, info)
   }
 
   class PayloadVerifyingPurchaseListener(expectedPayload: String) extends PurchaseListener {

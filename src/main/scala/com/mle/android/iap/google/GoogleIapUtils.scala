@@ -8,19 +8,14 @@ import com.mle.concurrent.ExecutionContexts.cached
 import scala.concurrent.Future
 import scala.util.Try
 
-/**
- *
- * @author mle
- */
 trait GoogleIapUtils extends IapUtilsBase {
   def publicKey: String
 
   /**
-   *
-   * @param sku the product ID
-   * @param activity an activity
-   * @return true if the user owns `sku`, false otherwise
-   */
+    * @param sku      the product ID
+    * @param activity an activity
+    * @return true if the user owns `sku`, false otherwise
+    */
   def hasSku(sku: String, activity: Activity): Future[Boolean] = withIAB(activity, iab => {
     iab.hasPurchase(sku).map(has => {
       info(s"User has SKU $sku: $has")
@@ -42,9 +37,9 @@ trait GoogleIapUtils extends IapUtilsBase {
     result
       .recover(logException("Unable to sync Google Play purchase status"))
       .onComplete(_ => {
-      // finally
-      Try(iab.close())
-    })
+        // finally
+        Try(iab.close())
+      })
     result
   }
 

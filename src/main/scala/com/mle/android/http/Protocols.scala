@@ -1,9 +1,5 @@
 package com.mle.android.http
 
-/**
- *
- * @author mle
- */
 object Protocols extends Enumeration {
   type Protocol = Value
   val Http, Https = Value

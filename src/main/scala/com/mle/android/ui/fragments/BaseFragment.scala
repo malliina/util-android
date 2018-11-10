@@ -5,10 +5,6 @@ import android.view.View
 import com.mle.android.ui.ActivityUtils
 import android.app.Activity
 
-/**
- *
- * @author mle
- */
 trait BaseFragment extends Fragment with ActivityUtils {
   def activity: Activity = getActivity
 

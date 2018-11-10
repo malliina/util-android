@@ -1,13 +1,10 @@
 package com.mle.android.receivers
 
-import android.content.{Intent, Context, BroadcastReceiver}
 import android.app.DownloadManager
+import android.content.{BroadcastReceiver, Context, Intent}
 
-/**
- * Should this not be registered in androidmanifest.xml?
- *
- * @author mle
- */
+/** Should this not be registered in androidmanifest.xml?
+  */
 trait DownloadCompleteListener extends BroadcastReceiver {
   protected val NO_ID = -1L
 

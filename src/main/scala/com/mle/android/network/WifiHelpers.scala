@@ -1,20 +1,15 @@
 package com.mle.android.network
 
 import android.content.Context
-import android.net.wifi.WifiManager
-import com.mle.network.NetworkDevice
 import android.net.ConnectivityManager
+import android.net.wifi.WifiManager
 
-/**
- *
- * @author mle
- */
 trait WifiHelpers {
   /**
-   *
-   * @param ctx context
-   * @return the WLAN SSID this device is currently connected to wrapped in an [[Option]], or [[None]] if there is no WiFi connectivity
-   */
+    *
+    * @param ctx context
+    * @return the WLAN SSID this device is currently connected to wrapped in an [[Option]], or [[None]] if there is no WiFi connectivity
+    */
   def currentSSID(ctx: Context): Option[String] = {
     val wifiManager = ctx.getSystemService(Context.WIFI_SERVICE).asInstanceOf[WifiManager]
     for {

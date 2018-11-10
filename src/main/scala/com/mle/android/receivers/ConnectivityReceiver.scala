@@ -4,10 +4,6 @@ import android.content.{Intent, Context, BroadcastReceiver}
 import android.net.{NetworkInfo, ConnectivityManager}
 import com.mle.android.util.UtilLog
 
-/**
- *
- * @author mle
- */
 trait ConnectivityReceiver extends BroadcastReceiver with UtilLog {
 
   import ConnectivityReceiver._

@@ -7,8 +7,8 @@ import com.mle.android.exceptions.{NotFoundHttpException, UnauthorizedHttpExcept
 import com.mle.android.util.UtilLog
 import com.mle.concurrent.ExecutionContexts.cached
 import com.mle.concurrent.Futures
-import org.apache.http.Header
-import org.apache.http.client.HttpResponseException
+import cz.msebera.android.httpclient.Header
+import cz.msebera.android.httpclient.client.HttpResponseException
 
 import scala.concurrent.{Future, Promise}
 import scala.util.Try
@@ -22,32 +22,30 @@ trait FutureHttpClient extends UtilLog with Closeable {
   //  httpClient setMaxConnections 256
   //  ConnManagerParams.setMaxTotalConnections(httpClient.getHttpClient.getParams, 256)
 
-  def addHeaders(headers: (String, String)*) = headers.foreach {
+  def addHeaders(headers: (String, String)*): Unit = headers.foreach {
     case (key, value) => httpClient.addHeader(key, value)
   }
 
-  /**
-   * Gets called before the request is executed.
-   *
-   * The default implementation trivially returns `uri`.
-   *
-   * @param uri the user-supplied uri string
-   * @return the uri actually used in the request
-   */
+  /** Gets called before the request is executed.
+    *
+    * The default implementation trivially returns `uri`.
+    *
+    * @param uri the user-supplied uri string
+    * @return the uri actually used in the request
+    */
   def transformUri(uri: String): String = uri
 
   def getEmpty(uri: String) = get(uri).map(_ => ())
 
-  /**
-   * GETs `uri`.
-   *
-   * The returned [[Future]] fails with an [[java.io.IOException]] if the server cannot be reached, an
-   * [[UnauthorizedHttpException]] if authentication fails and a [[NotFoundHttpException]] if the server responds with a
-   * 404. For other errors it may fail with a [[HttpResponseException]] containing the appropriate error code.
-   *
-   * @param uri request uri
-   * @return the HTTP response following a successful request
-   */
+  /** GETs `uri`.
+    *
+    * The returned [[Future]] fails with an [[java.io.IOException]] if the server cannot be reached, an
+    * [[UnauthorizedHttpException]] if authentication fails and a [[NotFoundHttpException]] if the server responds with a
+    * 404. For other errors it may fail with a [[cz.msebera.android.httpclient.client.HttpResponseException]] containing the appropriate error code.
+    *
+    * @param uri request uri
+    * @return the HTTP response following a successful request
+    */
   def get(uri: String): Future[HttpResponse] = get(uri, textResponseHandler)
 
   def get[T](uri: String, f: Promise[T] => AsyncHttpResponseHandler): Future[T] =
@@ -57,11 +55,10 @@ trait FutureHttpClient extends UtilLog with Closeable {
 
   def postFile(resource: String, file: File): Future[HttpResponse] = postFile(resource, file, textResponseHandler)
 
-  /**
-   * Performs a multipart/form-data upload of `file`.
-   *
-   * @param file file to upload
-   */
+  /** Performs a multipart/form-data upload of `file`.
+    *
+    * @param file file to upload
+    */
   def postFile[T](uri: String, file: File, f: Promise[T] => AsyncHttpResponseHandler): Future[T] =
     Futures.promisedFuture[T](p => {
       val params = new RequestParams()

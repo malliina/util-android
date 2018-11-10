@@ -3,10 +3,6 @@ package com.mle.android.ui.activities
 import android.os.Bundle
 import android.app.Activity
 
-/**
- *
- * @author mle
- */
 trait BaseActivity extends Activity {
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)

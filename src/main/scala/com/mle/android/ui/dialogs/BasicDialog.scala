@@ -6,9 +6,8 @@ import android.app.Dialog
 import play.api.libs.json.{Format, Json}
 
 /**
- *
- * @tparam T type of state
- */
+  * @tparam T type of state
+  */
 trait BasicDialog[T] extends DialogFragment {
   def saveState(state: Bundle): Unit
 

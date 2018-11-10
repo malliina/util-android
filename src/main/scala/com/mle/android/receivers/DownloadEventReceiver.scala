@@ -1,14 +1,11 @@
 package com.mle.android.receivers
 
-import android.content.{Intent, Context, BroadcastReceiver}
 import android.app.DownloadManager
+import android.content.{BroadcastReceiver, Context, Intent}
 import com.mle.android.util.UtilLog
 
-/**
- * TODO remove this nonsense.
- *
- * @author mle
- */
+/** TODO remove this nonsense.
+  */
 class DownloadEventReceiver extends BroadcastReceiver with UtilLog {
 
   val NO_ID = -1L
@@ -31,8 +28,8 @@ class DownloadEventReceiver extends BroadcastReceiver with UtilLog {
 
 object DownloadEventReceiver {
   /**
-   * Opens the Downloads app.
-   */
+    * Opens the Downloads app.
+    */
   def openDownloadsActivity(context: Context) {
     val intent = new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS)
     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

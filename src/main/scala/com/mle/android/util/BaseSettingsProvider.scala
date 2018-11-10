@@ -5,10 +5,6 @@ import play.api.libs.json.{Reads, Writes}
 import play.api.libs.json.Json._
 import PreferenceImplicits._
 
-/**
- *
- * @author mle
- */
 trait BaseSettingsProvider {
   def prefs: SharedPreferences
 

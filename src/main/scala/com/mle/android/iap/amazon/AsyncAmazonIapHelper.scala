@@ -9,17 +9,14 @@ import com.mle.concurrent.PromiseHelpers
 
 import scala.concurrent.Promise
 
-/**
- * This class registers itself as the observer for the [[com.amazon.inapp.purchasing.PurchasingManager]] upon
- * construction.
- *
- * Clients shall not use this class directly. Instead, use [[com.mle.android.iap.amazon.AmazonIapUtils]].
- *
- * TODO: Create rx observables that get new values when the callbacks are called. Futures are one-off and a bad match
- * for this API.
- *
- * @author mle
- */
+/** This class registers itself as the observer for the [[com.amazon.inapp.purchasing.PurchasingManager]] upon
+  * construction.
+  *
+  * Clients shall not use this class directly. Instead, use [[com.mle.android.iap.amazon.AmazonIapUtils]].
+  *
+  * TODO: Create rx observables that get new values when the callbacks are called. Futures are one-off and a bad match
+  * for this API.
+  */
 class AsyncAmazonIapHelper(ctx: Context) extends AmazonPurchasingObserver(ctx) with PromiseHelpers {
   private val isSandboxAllowed: Boolean = true
   private val purchaseUpdateFailureMessage = "Unable to read purchase status."

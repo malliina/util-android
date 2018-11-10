@@ -7,10 +7,6 @@ import android.widget.Toast
 import com.mle.util.Utils
 import android.support.v4.app.DialogFragment
 
-/**
- *
- * @author mle
- */
 trait ActivityUtils {
   def activity: Activity
 

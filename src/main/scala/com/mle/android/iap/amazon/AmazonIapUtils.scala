@@ -7,10 +7,6 @@ import com.mle.concurrent.ExecutionContexts.cached
 
 import scala.concurrent.Future
 
-/**
- *
- * @author mle
- */
 trait AmazonIapUtils extends IapUtilsBase {
   def skus(activity: Activity): Future[Set[String]] = withIAP(activity, iap => {
     PurchasingManager.initiatePurchaseUpdatesRequest(Offset.BEGINNING)

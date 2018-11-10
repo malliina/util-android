@@ -5,10 +5,6 @@ import scala.concurrent.Future
 import com.mle.android.util.UtilLog
 import com.mle.android.exceptions.AndroidException
 
-/**
- *
- * @author mle
- */
 object IapUtilsBase {
   val purchaseFailedMessage = "The purchase did not complete successfully."
   val invalidSkuMessage = "The product ID does not exist. Try again later."
@@ -20,23 +16,22 @@ trait IapUtilsBase extends UtilLog {
   def hasSku(sku: String, activity: Activity): Future[Boolean]
 
   /**
-   * @param sku product ID
-   * @param activity context
-   * @return the details of `sku` or a failure with [[NoSuchElementException]] if `sku` does not exist
-   */
+    * @param sku      product ID
+    * @param activity context
+    * @return the details of `sku` or a failure with [[NoSuchElementException]] if `sku` does not exist
+    */
   def productInfo(sku: String, activity: Activity): Future[ProductInfo]
 
-  /**
-   * Initiates the purchase of `sku`.
-   *
-   * The returned [[Future]] fails with an [[IapException]], for example
-   * [[InvalidSkuException]], [[AlreadyPurchasedException]] or 
-   * [[PurchaseCanceledException]] if the purchase is not completed successfully.
-   *
-   * @param sku product id
-   * @param activity context
-   * @return the purchased SKU
-   */
+  /** Initiates the purchase of `sku`.
+    *
+    * The returned [[Future]] fails with an [[IapException]], for example
+    * [[InvalidSkuException]], [[AlreadyPurchasedException]] or
+    * [[PurchaseCanceledException]] if the purchase is not completed successfully.
+    *
+    * @param sku      product id
+    * @param activity context
+    * @return the purchased SKU
+    */
   def purchase(sku: String, activity: Activity): Future[String]
 
   protected def logException(msg: String): PartialFunction[Throwable, Unit] = {

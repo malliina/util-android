@@ -1,9 +1,5 @@
 package com.mle.android.http
 
-/**
- *
- * @author mle
- */
 trait HttpConstants {
   val ACCEPT = "Accept"
   val AUTHORIZATION = "Authorization"
