@@ -1,5 +1,5 @@
+import com.malliina.sbtutils.SbtProjects
 import com.malliina.sbtutils.SbtUtils.{developerHomePageUrl, developerName, gitUserName}
-import com.malliina.sbtutils.{SbtProjects, SbtUtils}
 
 lazy val utilProject = SbtProjects.mavenPublishProject("util-android")
   .enablePlugins(AndroidLib)
@@ -7,7 +7,6 @@ lazy val utilProject = SbtProjects.mavenPublishProject("util-android")
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
 organization := "com.malliina"
-version := "0.10.0"
 scalaVersion := "2.11.12"
 platformTarget in Android := "android-27"
 libraryProject := true
