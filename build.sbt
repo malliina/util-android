@@ -13,13 +13,14 @@ libraryProject := true
 libraryDependencies ++= Seq(
   "com.android.support" % "support-v4" % "23.0.0",
   "com.loopj.android" % "android-async-http" % "1.4.9",
-  "com.github.malliina" %% "util-base" % "0.6.200"
+  "com.malliina" %% "util-base" % "1.6.3"
 )
 // android-sdk-plugin sets these to false, but we want to create jars for maven
 publishArtifact in packageBin in Compile := true
 publishArtifact in packageSrc in Compile := true
 resolvers ++= Seq(
-  "typesafe releases" at "http://repo.typesafe.com/typesafe/releases/",
+  "Typesafe releases" at "http://repo.typesafe.com/typesafe/releases/",
+  "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases/",
   Resolver.jcenterRepo
 )
 javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
