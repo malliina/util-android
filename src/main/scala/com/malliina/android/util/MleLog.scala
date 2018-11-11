@@ -28,5 +28,5 @@ trait MleLog {
 }
 
 trait UtilLog extends MleLog {
-  def tag: String = "com.mle.android"
+  def tag: String = "com.malliina.android"
 }

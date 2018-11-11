@@ -1,10 +1,11 @@
 package com.malliina.android.http
 
-import cz.msebera.android.httpclient.conn.ssl.SSLSocketFactory
-import javax.net.ssl.{SSLContext, TrustManager, X509TrustManager}
+import java.net.Socket
 import java.security.KeyStore
 import java.security.cert.X509Certificate
-import java.net.Socket
+
+import cz.msebera.android.httpclient.conn.ssl.SSLSocketFactory
+import javax.net.ssl.{SSLContext, TrustManager, X509TrustManager}
 
 /** A socket factory that trusts all certificates.
   *

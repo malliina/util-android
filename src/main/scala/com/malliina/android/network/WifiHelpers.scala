@@ -18,7 +18,7 @@ trait WifiHelpers {
     } yield ssid
   }
 
-  def network(ip: String) = {
+  def network(ip: String): String = {
     val lastDotIndex = ip lastIndexOf '.'
     ip.substring(0, lastDotIndex)
   }
