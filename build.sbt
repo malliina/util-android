@@ -4,8 +4,6 @@ import com.malliina.sbtutils.SbtUtils.{developerHomePageUrl, developerName, gitU
 lazy val utilProject = SbtProjects.mavenPublishProject("util-android")
   .enablePlugins(AndroidLib)
 
-net.virtualvoid.sbt.graph.Plugin.graphSettings
-
 organization := "com.malliina"
 scalaVersion := "2.11.12"
 platformTarget in Android := "android-27"
@@ -13,7 +11,7 @@ libraryProject := true
 libraryDependencies ++= Seq(
   "com.android.support" % "support-v4" % "23.0.0",
   "com.loopj.android" % "android-async-http" % "1.4.9",
-  "com.malliina" %% "util-base" % "1.6.3"
+  "com.malliina" %% "util-base" % "1.7.1"
 )
 // android-sdk-plugin sets these to false, but we want to create jars for maven
 publishArtifact in packageBin in Compile := true

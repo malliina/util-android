@@ -1,10 +1,10 @@
 package com.malliina.json
 
 import com.malliina.storage.{StorageLong, StorageSize}
-import play.api.libs.json.Json._
+import play.api.libs.json.Json.toJson
 import play.api.libs.json._
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.{Duration, DurationDouble}
 
 trait JsonFormats {
 
